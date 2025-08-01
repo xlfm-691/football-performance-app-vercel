@@ -1,128 +1,80 @@
-import React, { useState, useEffect } from "react";
-import Checklist from "./Checklist";
+import React, { useState, useEffect } from 'react';
+import Checklist from './Checklist';
+import History from './History';
+import ChartComponent from './Chart';
+import { exportToPDF } from './utils/exportPDF';
+import { exportToJSON } from './utils/exportJSON';
 
 export default function App() {
   const categories = {
-    "Condition Physique": [
-      "Endurance",
-      "Vitesse",
-      "Force",
-      "Agilité",
-      "Réactivité",
-    ],
-    "Technique": [
-      "Contrôle de balle",
-      "Passes",
-      "Tirs",
-      "Dribbles",
-      "Jonglerie",
-    ],
-    "Tactique": [
-      "Positionnement",
-      "Lecture du jeu",
-      "Prise de décision",
-      "Travail défensif",
-      "Travail offensif",
-    ],
-    "Mental": [
-      "Motivation",
-      "Concentration",
-      "Confiance",
-      "Gestion du stress",
-      "Esprit d'équipe",
-    ],
-    "Récupération": [
-      "Échauffement",
-      "Étirements",
-      "Récupération active",
-      "Hydratation et alimentation",
-      "Sommeil",
-    ],
+    "Condition Physique": ["Endurance", "Vitesse", "Force", "Agilité", "Réactivité"],
+    "Technique": ["Contrôle de balle", "Passes", "Tirs", "Dribbles", "Jonglerie"],
+    "Tactique": ["Positionnement", "Lecture du jeu", "Prise de décision", "Travail défensif", "Travail offensif"],
+    "Mental": ["Motivation", "Concentration", "Confiance", "Gestion du stress", "Esprit d'équipe"],
+    "Récupération": ["Échauffement", "Étirements", "Récupération active", "Hydratation et alimentation", "Sommeil"],
   };
 
-  const [selected, setSelected] = useState({});
+  const [scores, setScores] = useState({});
+  const [comment, setComment] = useState('');
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    const savedHistory = JSON.parse(localStorage.getItem("checklistHistory")) || [];
-    setHistory(savedHistory);
+    const saved = JSON.parse(localStorage.getItem('checklistHistory')) || [];
+    setHistory(saved);
   }, []);
 
-  const handleToggle = (category, item) => {
-    setSelected((prev) => ({
+  const handleScoreChange = (category, item, value) => {
+    setScores(prev => ({
       ...prev,
       [category]: {
         ...prev[category],
-        [item]: !prev[category]?.[item],
-      },
+        [item]: value
+      }
     }));
   };
 
   const handleSave = () => {
-    const newEntry = {
+    const entry = {
       date: new Date().toLocaleString(),
-      data: selected,
+      data: scores,
+      comment
     };
-    const updatedHistory = [newEntry, ...history];
-    setHistory(updatedHistory);
-    localStorage.setItem("checklistHistory", JSON.stringify(updatedHistory));
-    alert("✅ Session enregistrée !");
+    const updated = [entry, ...history];
+    setHistory(updated);
+    localStorage.setItem('checklistHistory', JSON.stringify(updated));
+    setComment('');
+    alert('✅ Session enregistrée !');
   };
 
   return (
-    <div style={{ padding: "1rem", maxWidth: 600, margin: "auto" }}>
-      <h1>🏆 Checklist Football</h1>
-      {Object.keys(categories).map((cat) => (
-        <Checklist
-          key={cat}
-          title={cat}
-          items={categories[cat]}
-          selected={selected[cat] || {}}
-          onToggle={(item) => handleToggle(cat, item)}
-        />
-      ))}
-
-      <button
-        onClick={handleSave}
-        style={{
-          backgroundColor: "#4caf50",
-          color: "white",
-          padding: "10px",
-          border: "none",
-          borderRadius: "5px",
-          marginTop: "1rem",
-          width: "100%",
-        }}
-      >
-        Enregistrer la session
-      </button>
-
-      <button
-        disabled
-        style={{
-          backgroundColor: "#ccc",
-          color: "#555",
-          padding: "10px",
-          border: "none",
-          borderRadius: "5px",
-          marginTop: "0.5rem",
-          width: "100%",
-        }}
-      >
-        Exporter en PDF (bientôt)
-      </button>
-
-      <h2 style={{ marginTop: "2rem" }}>📜 Historique</h2>
-      <ul>
-        {history.map((entry, idx) => (
-          <li key={idx} style={{ marginBottom: "0.5rem" }}>
-            <strong>{entry.date}</strong>
-            <pre style={{ background: "#f9f9f9", padding: "5px" }}>
-              {JSON.stringify(entry.data, null, 2)}
-            </pre>
-          </li>
+    <div className="container">
+      <h1>🏆 Checklist Football Pro</h1>
+      <div className="section">
+        {Object.keys(categories).map(cat => (
+          <Checklist
+            key={cat}
+            title={cat}
+            items={categories[cat]}
+            scores={scores[cat] || {}}
+            onScoreChange={(item, value) => handleScoreChange(cat, item, value)}
+          />
         ))}
-      </ul>
+        <textarea
+          placeholder="📝 Commentaires"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          style={{width: '100%', marginTop: '1rem'}}
+        />
+        <button onClick={handleSave} style={{width: '100%', marginTop: '0.5rem', background:'#4caf50', color:'#fff', padding:'0.5rem', border:'none', borderRadius:'5px'}}>Enregistrer la session</button>
+        <button onClick={() => exportToJSON(history)} style={{width: '100%', marginTop: '0.5rem', background:'#2196F3', color:'#fff', padding:'0.5rem', border:'none', borderRadius:'5px'}}>Exporter JSON</button>
+        <button onClick={() => exportToPDF(history)} style={{width: '100%', marginTop: '0.5rem', background:'#f44336', color:'#fff', padding:'0.5rem', border:'none', borderRadius:'5px'}}>Exporter PDF</button>
+      </div>
+      <div className="section">
+        <History history={history} />
+      </div>
+      <div className="section">
+        <ChartComponent history={history} />
+      </div>
     </div>
   );
 }

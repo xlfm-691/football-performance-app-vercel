@@ -4,16 +4,21 @@ body {
   padding: 0;
   background: #fafafa;
 }
-
-h1 {
+h1, h2 {
   text-align: center;
 }
-
 button {
   cursor: pointer;
 }
-
-pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 1rem;
+}
+.section {
+  background: white;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }

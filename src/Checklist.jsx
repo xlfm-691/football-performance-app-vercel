@@ -1,18 +1,21 @@
-import React from "react";
+import React from 'react';
 
-export default function Checklist({ title, items, selected, onToggle }) {
+export default function Checklist({ title, items, scores, onScoreChange }) {
   return (
-    <div style={{ marginBottom: "1rem", borderBottom: "1px solid #ddd", paddingBottom: "1rem" }}>
+    <div>
       <h3>{title}</h3>
-      {items.map((item) => (
-        <label key={item} style={{ display: "block", margin: "5px 0" }}>
+      {items.map(item => (
+        <div key={item} style={{marginBottom:'5px'}}>
+          {item} :
           <input
-            type="checkbox"
-            checked={selected[item] || false}
-            onChange={() => onToggle(item)}
-          />{" "}
-          {item}
-        </label>
+            type="number"
+            min="0"
+            max="6"
+            value={scores[item] || ''}
+            onChange={(e) => onScoreChange(item, e.target.value)}
+            style={{marginLeft:'5px', width:'50px'}}
+          />
+        </div>
       ))}
     </div>
   );
