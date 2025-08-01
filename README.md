@@ -1,2 +1,0 @@
-# football-performance-app-vercel
-
